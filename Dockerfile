@@ -1,9 +1,24 @@
-FROM resin/armv7hf-debian
+FROM gewoonmaarten/alpine-arm-qemu
 
 RUN [ "cross-build-start" ]
 
-RUN apt-get update  
-RUN apt-get install python  
-RUN pip install virtualenv
+RUN apk update && \
+    apk add nginx \
+            bc \
+	    curl \
+	    openssl && \
+    curl https://get.acme.sh | sh  
 
-RUN [ "cross-build-end" ] 
+CMD openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+ENTRYPOINT ["./create-cert.sh"]
+
+COPY default /etc/nginx/sites-enabled/
+
+RUN [ "cross-build-end" ]  
+
+
+EXPOSE 80
+EXPOSE 443
+
+
